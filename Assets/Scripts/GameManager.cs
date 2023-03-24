@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    void Awake()
+    private void Awake()
     {
         if(Instance == null)
         {
@@ -20,9 +20,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void ChangeScene(string name)
+    public void ChangeScene(string sceneName)
     {
-        SceneManager.LoadScene(name, LoadSceneMode.Single);
+        SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
     }
 
     public void QuitGame()
