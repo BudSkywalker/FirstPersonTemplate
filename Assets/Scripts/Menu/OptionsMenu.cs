@@ -7,7 +7,8 @@ namespace Menu
     public class OptionsMenu : MonoBehaviour
     {
         public static OptionsMenu Instance;
-        public static bool isOpen;
+        public static bool IsOpen { get; private set; }
+
         [SerializeField]
         private AudioMixer mixer;
         [SerializeField]
@@ -38,6 +39,7 @@ namespace Menu
                 if (Instance != this) Destroy(this);
             }
 
+            // ReSharper disable once InlineOutVariableDeclaration
             float temp;
             mixer.GetFloat("Master Volume", out temp);
             PlayerPrefs.GetFloat("Master Volume", temp);
@@ -56,7 +58,7 @@ namespace Menu
 
         private void OnEnable()
         {
-            isOpen = true;
+            IsOpen = true;
             masterVolume.SetValueWithoutNotify(PlayerPrefs.GetFloat("Master Volume", 0));
             musicVolume.SetValueWithoutNotify(PlayerPrefs.GetFloat("Music Volume", 0));
             sfxVolume.SetValueWithoutNotify(PlayerPrefs.GetFloat("SFX Volume", 0));
@@ -97,7 +99,7 @@ namespace Menu
         public void Close()
         {
             Save();
-            isOpen = false;
+            IsOpen = false;
             gameObject.SetActive(false);
         }
     }

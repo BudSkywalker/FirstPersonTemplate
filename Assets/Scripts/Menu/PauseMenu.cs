@@ -46,7 +46,7 @@ namespace Menu
             IsPaused = !IsPaused;
         }
 
-        private void PauseGame()
+        public void PauseGame()
         {
             pauseMenu.SetActive(true);
             Time.timeScale = 0f;
@@ -55,7 +55,7 @@ namespace Menu
             Cursor.visible = true;
         }
 
-        private void ResumeGame()
+        public void ResumeGame()
         {
             pauseMenu.SetActive(false);
             Time.timeScale = 1f;
