@@ -46,11 +46,10 @@ public class TextWriter : MonoBehaviour
                     case WriteMode.Overflow:
                         break;
                     case WriteMode.Scroll:
-                        textbox.text = textbox.text.Substring(1);
-                        if (textbox.preferredHeight > textbox.GetComponent<RectTransform>().rect.height) textbox.text = textbox.text[1..];
-                        if (textbox.preferredHeight > textbox.GetComponent<RectTransform>().rect.height) textbox.text = textbox.text[1..];
-                        if (textbox.preferredHeight > textbox.GetComponent<RectTransform>().rect.height) textbox.text = textbox.text[1..];
-                        if (textbox.preferredHeight > textbox.GetComponent<RectTransform>().rect.height) textbox.text = textbox.text[1..];
+                        while (textbox.preferredHeight > textbox.GetComponent<RectTransform>().rect.height)
+                        {
+                            textbox.text = textbox.text[1..];
+                        }
                         break;
                     case WriteMode.Delete:
                         textbox.text = "";
