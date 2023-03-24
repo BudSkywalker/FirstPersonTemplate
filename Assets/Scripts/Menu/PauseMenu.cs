@@ -23,15 +23,8 @@ namespace Menu
 
         private void Awake()
         {
-            if (Instance == null)
-            {
-                Instance = this;
-                DontDestroyOnLoad(this);
-            }
-            else if (Instance != this)
-            {
-                Destroy(this);
-            }
+            if (Instance == null) Instance = this;
+            else if (Instance != this) Destroy(this);
 
             pauseMenu.SetActive(false);
         }
@@ -46,6 +39,11 @@ namespace Menu
                 else
                     PauseGame();
             }
+        }
+
+        public void TogglePause()
+        {
+            IsPaused = !IsPaused;
         }
 
         private void PauseGame()
@@ -66,15 +64,7 @@ namespace Menu
             Cursor.visible = false;
         }
 
-        [Obsolete]
-        public void MainMenu()
-        {
-            Time.timeScale = 1f;
-            isPaused = false;
-            Debug.Log("Going to main menu...");
-            SceneManager.LoadScene("Menu");
-        }
-
+        //Bug: No longer used
         [Obsolete]
         public void QuitGame()
         {

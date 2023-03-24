@@ -215,7 +215,7 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private void FixedUpdate()
     {
-        if (PauseMenu.isPaused) return;
+        if (PauseMenu.IsPaused) return;
 
         Jump();
 
@@ -241,7 +241,7 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private void Look()
     {
-        if (PauseMenu.isPaused) return;
+        if (PauseMenu.IsPaused) return;
 
         float lookX = Input.GetAxis("Mouse X") * mouseSensitivity + Input.GetAxis("Controller X") * controllerSensitivity;
         float lookY = Input.GetAxis("Mouse Y") * mouseSensitivity + Input.GetAxis("Controller Y") * controllerSensitivity;
