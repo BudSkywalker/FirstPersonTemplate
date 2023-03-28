@@ -1,10 +1,14 @@
 using Menu;
 using UnityEngine;
+using UnityEngine.InputSystem;
+
+// ReSharper disable Unity.InefficientPropertyAccess
 
 /// <summary>
 /// Manages the player of the game and handles calls for <see cref="ITool" />s and <see cref="IInteractable" />s
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(PlayerInput))]
 public sealed class PlayerController : MonoBehaviour
 {
     #region Vars
@@ -41,6 +45,10 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     [SerializeField]
     private LayerMask collisionMask;
+    /// <summary>
+    /// Unity's new input system attached to this GameObject
+    /// </summary>
+    private PlayerInput input;
     #endregion
 
     #region Player Info
@@ -67,7 +75,7 @@ public sealed class PlayerController : MonoBehaviour
     [SerializeField]
     private float gravity = 9.81f;
     /// <summary>
-    /// What number to multiply the player's <see cref="controller.height" /> by when crouching
+    /// What number to multiply the player's <see cref="controller" />'s height by when crouching
     /// </summary>
     [SerializeField]
     private float crouchModifier = 0.5f;
@@ -130,13 +138,13 @@ public sealed class PlayerController : MonoBehaviour
     /// <summary>
     /// The player's terminal velocity. This is calculated in <see cref="Start" /> using the actual equation for terminal velocity
     /// </summary>
-    private float tVelo;
+    private float tVelocity;
     /// <summary>
-    /// A place holder for the character's height to reset <see cref="controller.height" /> back to after crouching
+    /// A place holder for the character's height to reset <see cref="controller" />'s height back to after crouching
     /// </summary>
     private float height;
     /// <summary>
-    /// A place holder for the character's step offset to reset <see cref="controller.stepOffset" /> after jumping
+    /// A place holder for the character's step offset to reset <see cref="controller" />'s stepOffset after jumping
     /// </summary>
     private float stepOffset;
     /// <summary>
@@ -188,11 +196,15 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private void Start()
     {
+        PlayerPrefs.DeleteAll();
         controller = GetComponent<CharacterController>();
+        input = GetComponent<PlayerInput>();
+
         UpdateSettings();
+
         Cursor.lockState = CursorLockMode.Locked;
         fov = playerCamera.fieldOfView;
-        tVelo = Mathf.Sqrt(2 * mass * gravity / 0.8575f * Mathf.PI * Mathf.Pow(controller.radius, 2));
+        tVelocity = Mathf.Sqrt(2 * mass * gravity / 0.8575f * Mathf.PI * Mathf.Pow(controller.radius, 2));
         height = controller.height;
         stepOffset = controller.stepOffset;
 
@@ -206,7 +218,7 @@ public sealed class PlayerController : MonoBehaviour
     {
         Look();
         Crouch();
-        Sprint();
+        HandleMovement();
         HandleTool();
     }
 
@@ -229,8 +241,8 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     public void UpdateSettings()
     {
-        mouseSensitivity = PlayerPrefs.GetFloat("Mouse Sensitivity", 5);
-        controllerSensitivity = PlayerPrefs.GetFloat("Controller Sensitivity", 15);
+        mouseSensitivity = PlayerPrefs.GetFloat("Mouse Sensitivity", 0.5f);
+        controllerSensitivity = PlayerPrefs.GetFloat("Controller Sensitivity", 5f);
         toggleCrouch = PlayerPrefs.GetInt("Toggle Crouch", 0) == 1;
         toggleSprint = PlayerPrefs.GetInt("Toggle Sprint", 0) == 1;
         invertY = PlayerPrefs.GetInt("Invert Y", 0) == 1;
@@ -243,8 +255,21 @@ public sealed class PlayerController : MonoBehaviour
     {
         if (PauseMenu.IsPaused) return;
 
-        float lookX = Input.GetAxis("Mouse X") * mouseSensitivity + Input.GetAxis("Controller X") * controllerSensitivity;
-        float lookY = Input.GetAxis("Mouse Y") * mouseSensitivity + Input.GetAxis("Controller Y") * controllerSensitivity;
+        float lookX = input.actions.FindAction("Look").ReadValue<Vector2>().x;
+        float lookY = input.actions.FindAction("Look").ReadValue<Vector2>().y;
+
+        switch (input.currentControlScheme)
+        {
+            case "Mouse Controls":
+                lookX *= mouseSensitivity;
+                lookY *= mouseSensitivity;
+                break;
+            case "Controller Controls":
+                lookX *= controllerSensitivity;
+                lookY *= controllerSensitivity;
+                break;
+        }
+
         if (invertY) lookY *= -1;
 
         pitch = Mathf.Clamp(pitch - lookY, -90, 90);
@@ -260,7 +285,7 @@ public sealed class PlayerController : MonoBehaviour
     {
         if (toggleCrouch)
         {
-            if (Input.GetAxis("Crouch") > 0)
+            if (input.actions.FindAction("Crouch").IsPressed())
             {
                 if (!cPress)
                 {
@@ -288,7 +313,7 @@ public sealed class PlayerController : MonoBehaviour
         }
         else
         {
-            if (Input.GetAxis("Crouch") > 0)
+            if (input.actions.FindAction("Crouch").IsPressed())
             {
                 controller.height = height * crouchModifier;
                 controller.center = new(0, -controller.height / 2, 0);
@@ -306,14 +331,11 @@ public sealed class PlayerController : MonoBehaviour
     /// <summary>
     /// Handles sprinting and generic movement. Called on <see cref="Update" />
     /// </summary>
-    private void Sprint()
+    private void HandleMovement()
     {
-        float x = Input.GetAxis("Horizontal") * playerSpeed;
-        float y = Input.GetAxis("Vertical") * playerSpeed;
-
         if (toggleSprint)
         {
-            if (Input.GetAxis("Sprint") > 0)
+            if (input.actions.FindAction("Sprint").IsPressed())
             {
                 if (!sPress)
                 {
@@ -326,29 +348,32 @@ public sealed class PlayerController : MonoBehaviour
                 sPress = false;
             }
 
-            if (sToggle)
-            {
-                controller.Move(transform.forward * (y * sprintModifier * Time.deltaTime) + transform.right * (x * sprintModifier * Time.deltaTime));
-                if (fovModifier && playerCamera.fieldOfView < fov * (1 + sprintModifier * 0.1f)) playerCamera.fieldOfView += 0.5f;
-            }
-            else
-            {
-                controller.Move(transform.forward * (y * Time.deltaTime) + transform.right * (x * Time.deltaTime));
-                if (playerCamera.fieldOfView > fov) playerCamera.fieldOfView -= 0.5f;
-            }
+            Move(sToggle);
         }
         else
         {
-            if (Input.GetAxis("Sprint") > 0)
-            {
-                controller.Move(transform.forward * (y * sprintModifier * Time.deltaTime) + transform.right * (x * sprintModifier * Time.deltaTime));
-                if (fovModifier && playerCamera.fieldOfView < fov * (1 + sprintModifier * 0.1f)) playerCamera.fieldOfView += 0.5f;
-            }
-            else
-            {
-                controller.Move(transform.forward * (y * Time.deltaTime) + transform.right * (x * Time.deltaTime));
-                if (playerCamera.fieldOfView > fov) playerCamera.fieldOfView -= 0.5f;
-            }
+            Move(input.actions.FindAction("Sprint").IsPressed());
+        }
+    }
+
+    /// <summary>
+    /// Helper function for <see cref="HandleMovement" />
+    /// </summary>
+    /// <param name="sprinting">Whether to add <see cref="sprintModifier" /> or not</param>
+    private void Move(bool sprinting)
+    {
+        Vector2 movementInput = input.actions.FindAction("Move").ReadValue<Vector2>() * playerSpeed;
+
+        if (sprinting)
+        {
+            controller.Move(transform.forward * (movementInput.y * sprintModifier * Time.deltaTime) +
+                            transform.right * (movementInput.x * sprintModifier * Time.deltaTime));
+            if (fovModifier && playerCamera.fieldOfView < fov * (1 + sprintModifier * 0.1f)) playerCamera.fieldOfView += 0.5f;
+        }
+        else
+        {
+            controller.Move(transform.forward * (movementInput.y * Time.deltaTime) + transform.right * (movementInput.x * Time.deltaTime));
+            if (playerCamera.fieldOfView > fov) playerCamera.fieldOfView -= 0.5f;
         }
     }
 
@@ -360,7 +385,7 @@ public sealed class PlayerController : MonoBehaviour
     private void HandleTool()
     {
         //TODO: Multiple hands/inventory system
-        
+
         heldTool = handSlot.GetComponentInChildren<ITool>();
 
         if (heldTool == null) return;
@@ -375,17 +400,17 @@ public sealed class PlayerController : MonoBehaviour
     /// <seealso cref="SecondaryAction" />
     private void PrimaryAction()
     {
-        if (Input.GetAxis("Primary Action") > 0 && !action1Down)
+        if (input.actions.FindAction("Primary Action").IsPressed() && !action1Down)
         {
             action1Down = true;
 
             heldTool.OnPrimaryFire(this);
         }
-        else if (Input.GetAxis("Primary Action") > 0 && action1Down)
+        else if (input.actions.FindAction("Primary Action").IsPressed() && action1Down)
         {
             heldTool.OnPrimaryHeld(this);
         }
-        else if (Input.GetAxis("Primary Action") == 0 && action1Down)
+        else if (!input.actions.FindAction("Primary Action").IsPressed() && action1Down)
         {
             heldTool.OnPrimaryRelease(this);
             action1Down = false;
@@ -398,17 +423,17 @@ public sealed class PlayerController : MonoBehaviour
     /// <seealso cref="PrimaryAction" />
     private void SecondaryAction()
     {
-        if (Input.GetAxis("Secondary Action") > 0 && !action2Down)
+        if (input.actions.FindAction("Secondary Action").IsPressed() && !action2Down)
         {
             action2Down = true;
 
             heldTool.OnSecondaryFire(this);
         }
-        else if (Input.GetAxis("Secondary Action") > 0 && action2Down)
+        else if (input.actions.FindAction("Secondary Action").IsPressed() && action2Down)
         {
             heldTool.OnSecondaryHeld(this);
         }
-        else if (Input.GetAxis("Secondary Action") == 0 && action2Down)
+        else if (!input.actions.FindAction("Secondary Action").IsPressed() && action2Down)
         {
             heldTool.OnSecondaryRelease(this);
             action2Down = false;
@@ -420,14 +445,15 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private void Jump()
     {
-        if (Input.GetAxis("Jump") > 0 && Physics.CheckSphere(groundChecker.transform.position, groundChecker.radius, collisionMask))
+        if (input.actions.FindAction("Jump").IsPressed() &&
+            Physics.CheckSphere(groundChecker.transform.position, groundChecker.radius, collisionMask))
         {
             velocity = Mathf.Sqrt(jumpHeight * 2 * gravity);
             controller.stepOffset = 0.001f;
         }
         else if (!Physics.CheckSphere(groundChecker.transform.position, groundChecker.radius, collisionMask))
         {
-            if (velocity > -tVelo) velocity -= gravity * Time.fixedDeltaTime;
+            if (velocity > -tVelocity) velocity -= gravity * Time.fixedDeltaTime;
         }
         else
         {
@@ -452,7 +478,7 @@ public sealed class PlayerController : MonoBehaviour
         foreach (Transform t in carrySlot.GetComponentsInChildren<Transform>()) t.rotation = playerCamera.transform.rotation;
 
         IInteractable child = carrySlot.GetComponentInChildren<IInteractable>();
-        if (Input.GetAxis("Interact") > 0 && !interactDown)
+        if (input.actions.FindAction("Interact").IsPressed() && !interactDown)
         {
             interactDown = true;
 
@@ -467,14 +493,14 @@ public sealed class PlayerController : MonoBehaviour
                 child?.OnInteract(this);
             }
         }
-        else if (Input.GetAxis("Interact") > 0 && interactDown)
+        else if (input.actions.FindAction("Interact").IsPressed() && interactDown)
         {
             if (interactingObject != null)
                 interactingObject.WhileHeld(this);
             else
                 child?.OnInteract(this);
         }
-        else if (Input.GetAxis("Interact") == 0 && interactDown)
+        else if (!input.actions.FindAction("Interact").IsPressed() && interactDown)
         {
             if (interactingObject != null)
                 interactingObject.OnReleased(this);

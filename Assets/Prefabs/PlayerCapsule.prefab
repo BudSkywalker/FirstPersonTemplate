@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 2542249857354215522}
   - component: {fileID: 2542249857354215523}
   - component: {fileID: 2542249857354215534}
+  - component: {fileID: -6365044605111880849}
   m_Layer: 0
   m_Name: PlayerCapsule
   m_TagString: Untagged
@@ -180,6 +181,40 @@ MonoBehaviour:
   mass: 70
   reach: 10
   fovModifier: 1
+--- !u!114 &-6365044605111880849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2542249857354215520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: bd5920fd917fd184181def6bbdd6bfaa, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 53122dc5-de5d-4bf8-b9d7-7773be50ec0b
+    m_ActionName: PlayerController/Look[/Mouse/delta,/XInputControllerWindows/rightStick]
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: PlayerController
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &2542249858228431525
 GameObject:
   m_ObjectHideFlags: 0

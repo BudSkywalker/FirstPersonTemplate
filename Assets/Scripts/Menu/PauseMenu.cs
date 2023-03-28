@@ -8,14 +8,14 @@ namespace Menu
     {
         private static PauseMenu Instance;
 
-        private static bool isPaused;
+        private static bool _isPaused;
         public GameObject pauseMenu;
         public static bool IsPaused
         {
-            get => isPaused;
+            get => _isPaused;
             set
             {
-                isPaused = value;
+                _isPaused = value;
                 if (IsPaused) Instance.PauseGame();
                 else Instance.ResumeGame();
             }
@@ -29,18 +29,6 @@ namespace Menu
             pauseMenu.SetActive(false);
         }
 
-        private void Update()
-        {
-            //TODO: Update controls
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
-            {
-                if (isPaused)
-                    ResumeGame();
-                else
-                    PauseGame();
-            }
-        }
-
         public void TogglePause()
         {
             IsPaused = !IsPaused;
@@ -50,7 +38,7 @@ namespace Menu
         {
             pauseMenu.SetActive(true);
             Time.timeScale = 0f;
-            isPaused = true;
+            _isPaused = true;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
@@ -59,17 +47,9 @@ namespace Menu
         {
             pauseMenu.SetActive(false);
             Time.timeScale = 1f;
-            isPaused = false;
+            _isPaused = false;
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-        }
-
-        //Bug: No longer used
-        [Obsolete]
-        public void QuitGame()
-        {
-            Debug.Log("Quitting Game");
-            Application.Quit();
         }
     }
 }
