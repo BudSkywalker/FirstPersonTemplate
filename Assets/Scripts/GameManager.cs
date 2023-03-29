@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,7 +7,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if(Instance == null)
+        if (Instance == null)
         {
             Instance = this;
         }
@@ -18,6 +15,11 @@ public class GameManager : MonoBehaviour
         {
             if (Instance != this) Destroy(gameObject);
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        Settings.SaveSettings();
     }
 
     public void ChangeScene(string sceneName)

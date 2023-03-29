@@ -41,7 +41,7 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     public GameObject handSlot;
     /// <summary>
-    /// The <see cref="LayerMask" /> level to use to determine what is collidable
+    /// The <see cref="LayerMask" /> level to use to determine what can be collided with
     /// </summary>
     [SerializeField]
     private LayerMask collisionMask;
@@ -92,35 +92,6 @@ public sealed class PlayerController : MonoBehaviour
     private float reach = 10;
     #endregion
 
-    #region Settings
-    /// <summary>
-    /// What to multiply the mouse input by when looking around
-    /// </summary>
-    [Header("Settings")]
-    private float mouseSensitivity;
-    /// <summary>
-    /// What to multiply the controller input by when looking around
-    /// </summary>
-    private float controllerSensitivity;
-    /// <summary>
-    /// Whether crouching should be trigger by holding Crouch or tapping Crouch
-    /// </summary>
-    private bool toggleCrouch;
-    /// <summary>
-    /// Whether sprinting should be trigger by holding Sprint or tapping Sprint
-    /// </summary>
-    private bool toggleSprint;
-    /// <summary>
-    /// Inverts the Y control
-    /// </summary>
-    private bool invertY;
-    /// <summary>
-    /// Should the <see cref="playerCamera" />'s FOV move when sprinting (can cause motion sickness)
-    /// </summary>
-    [SerializeField]
-    private bool fovModifier = true;
-    #endregion
-
     #region Input
     //protected
     /// <summary>
@@ -160,7 +131,7 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private bool action2Down;
     /// <summary>
-    /// Tracks crouch state when <see cref="toggleCrouch" /> is true
+    /// Tracks crouch state when <see cref="GameplaySettings.toggleCrouch" /> is true
     /// </summary>
     private bool cToggle;
     /// <summary>
@@ -168,7 +139,7 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private bool cPress;
     /// <summary>
-    /// Tracks sprint state when <see cref="toggleSprint" /> is true
+    /// Tracks sprint state when <see cref="GameplaySettings.toggleSprint" /> is true
     /// </summary>
     private bool sToggle;
     /// <summary>
@@ -199,8 +170,6 @@ public sealed class PlayerController : MonoBehaviour
         PlayerPrefs.DeleteAll();
         controller = GetComponent<CharacterController>();
         input = GetComponent<PlayerInput>();
-
-        UpdateSettings();
 
         Cursor.lockState = CursorLockMode.Locked;
         fov = playerCamera.fieldOfView;
@@ -235,19 +204,7 @@ public sealed class PlayerController : MonoBehaviour
     }
     #endregion
 
-    #region Funcs
-    /// <summary>
-    /// Updates the settings based on user input
-    /// </summary>
-    public void UpdateSettings()
-    {
-        mouseSensitivity = PlayerPrefs.GetFloat("Mouse Sensitivity", 0.5f);
-        controllerSensitivity = PlayerPrefs.GetFloat("Controller Sensitivity", 5f);
-        toggleCrouch = PlayerPrefs.GetInt("Toggle Crouch", 0) == 1;
-        toggleSprint = PlayerPrefs.GetInt("Toggle Sprint", 0) == 1;
-        invertY = PlayerPrefs.GetInt("Invert Y", 0) == 1;
-    }
-
+    #region Custom Funcs
     /// <summary>
     /// Handles camera movement and looking around. Called on <see cref="Update" />
     /// </summary>
@@ -261,16 +218,16 @@ public sealed class PlayerController : MonoBehaviour
         switch (input.currentControlScheme)
         {
             case "Mouse Controls":
-                lookX *= mouseSensitivity;
-                lookY *= mouseSensitivity;
+                lookX *= Settings.GetSettings().gameplaySettings.mouseSensitivity;
+                lookY *= Settings.GetSettings().gameplaySettings.mouseSensitivity;
                 break;
             case "Controller Controls":
-                lookX *= controllerSensitivity;
-                lookY *= controllerSensitivity;
+                lookX *= Settings.GetSettings().gameplaySettings.controllerSensitivity;
+                lookY *= Settings.GetSettings().gameplaySettings.controllerSensitivity;
                 break;
         }
 
-        if (invertY) lookY *= -1;
+        if (Settings.GetSettings().gameplaySettings.invertY) lookY *= -1;
 
         pitch = Mathf.Clamp(pitch - lookY, -90, 90);
 
@@ -283,7 +240,7 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private void Crouch()
     {
-        if (toggleCrouch)
+        if (Settings.GetSettings().gameplaySettings.toggleCrouch)
         {
             if (input.actions.FindAction("Crouch").IsPressed())
             {
@@ -333,7 +290,7 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private void HandleMovement()
     {
-        if (toggleSprint)
+        if (Settings.GetSettings().gameplaySettings.toggleSprint)
         {
             if (input.actions.FindAction("Sprint").IsPressed())
             {
@@ -368,12 +325,15 @@ public sealed class PlayerController : MonoBehaviour
         {
             controller.Move(transform.forward * (movementInput.y * sprintModifier * Time.deltaTime) +
                             transform.right * (movementInput.x * sprintModifier * Time.deltaTime));
-            if (fovModifier && playerCamera.fieldOfView < fov * (1 + sprintModifier * 0.1f)) playerCamera.fieldOfView += 0.5f;
+            if (Settings.GetSettings().gameplaySettings.fovModifier && playerCamera.fieldOfView < fov * (1 + sprintModifier * 0.1f))
+                playerCamera.fieldOfView += 0.5f;
+            if (playerCamera.fieldOfView > fov) playerCamera.fieldOfView = fov;
         }
         else
         {
             controller.Move(transform.forward * (movementInput.y * Time.deltaTime) + transform.right * (movementInput.x * Time.deltaTime));
             if (playerCamera.fieldOfView > fov) playerCamera.fieldOfView -= 0.5f;
+            if (playerCamera.fieldOfView < fov) playerCamera.fieldOfView = fov;
         }
     }
 
