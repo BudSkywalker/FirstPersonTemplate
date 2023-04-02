@@ -171,7 +171,7 @@ public sealed class PlayerController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         input = GetComponent<PlayerInput>();
 
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
         fov = playerCamera.fieldOfView;
         tVelocity = Mathf.Sqrt(2 * mass * gravity / 0.8575f * Mathf.PI * Mathf.Pow(controller.radius, 2));
         height = controller.height;
