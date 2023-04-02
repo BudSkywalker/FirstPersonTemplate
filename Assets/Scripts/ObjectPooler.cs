@@ -1,30 +1,28 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 /// <summary>
 /// Handles object pooling
 /// </summary>
 public class ObjectPooler : MonoBehaviour
 {
-    [SerializeField] private GameObject objectToPool;
-    [SerializeField] private int numToPool;
-    [SerializeField] private bool canSpawnMoreThanPool;
+    [SerializeField]
+    private GameObject objectToPool;
+    [SerializeField]
+    private int numToPool;
+    [SerializeField]
+    private bool canSpawnMoreThanPool;
 
     private readonly List<GameObject> objectsPooled = new();
-    
-    void Start()
+
+    private void Start()
     {
         for (int i = 0; i < numToPool; i++)
         {
             GameObject go = Instantiate(objectToPool, transform);
             IPoolableObject poolableInterface = go.GetComponent<IPoolableObject>();
-            if (poolableInterface != null)
-            {
-                poolableInterface.Pooler = this;
-            }
+            if (poolableInterface != null) poolableInterface.Pooler = this;
             go.SetActive(false);
             objectsPooled.Add(go);
         }
@@ -48,12 +46,14 @@ public class ObjectPooler : MonoBehaviour
                 toSpawn = Instantiate(objectToPool, transform);
                 objectsPooled.Add(toSpawn);
             }
-            else return null;
+            else
+            {
+                return null;
+            }
         }
-        
-        IPoolableObject interfaceCaller = toSpawn.GetComponent<IPoolableObject>();
-        interfaceCaller?.OnSpawn();
-        
+
+        toSpawn.GetComponent<IPoolableObject>()?.OnSpawn();
+
         toSpawn.SetActive(true);
         return toSpawn;
     }
@@ -64,8 +64,7 @@ public class ObjectPooler : MonoBehaviour
     /// <param name="gameObject"></param>
     public static void Despawn(GameObject gameObject)
     {
-        IPoolableObject interfaceCaller = gameObject.GetComponent<IPoolableObject>();
-        interfaceCaller?.OnDespawn();
+        gameObject.GetComponent<IPoolableObject>()?.OnDespawn();
         gameObject.SetActive(false);
     }
 }
@@ -79,10 +78,12 @@ public interface IPoolableObject
     /// The <c>ObjectPooler</c> associated with this object
     /// </summary>
     public ObjectPooler Pooler { get; set; }
+
     /// <summary>
     /// Called when object spawns. Use instead of Start()
     /// </summary>
     public void OnSpawn();
+
     /// <summary>
     /// Called when object despawns. Use instead of OnDestroy()
     /// </summary>
