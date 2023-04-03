@@ -10,16 +10,15 @@ public static class Settings
     private static SettingsContainer settings;
     private static bool hasLoaded;
 
-    public static SettingsContainer GetSettings()
+    public static ref SettingsContainer GetSettings()
     {
         if (!hasLoaded) LoadSettingsFromFile();
-        return settings;
+        return ref settings;
     }
 
     public static void SaveSettings()
     {
         SaveSettingsToFile();
-        Debug.Log("Settings saved to " + FilePath);
     }
 
     private static void SaveSettingsToFile()
@@ -56,12 +55,7 @@ public static class Settings
 
             Debug.Log("Building new settings file from default values");
 
-            //NOTE: Default settings are declared here
-            settings = new(
-                new(),
-                new(),
-                new(0.5f, 5f, false, false, false, true),
-                new());
+            settings = new(new(), new(), new(), new());
 
             stream.Close();
             SaveSettingsToFile();
@@ -69,6 +63,7 @@ public static class Settings
         finally
         {
             hasLoaded = true;
+            Debug.Log("Settings file located at " + FilePath);
         }
     }
 }
@@ -92,19 +87,19 @@ public struct SettingsContainer
 }
 
 [Serializable]
-public struct VideoSettings
+public class VideoSettings
 {
     //TODO
 }
 
 [Serializable]
-public struct AudioSettings
+public class AudioSettings
 {
     //TODO
 }
 
 [Serializable]
-public struct GameplaySettings
+public class GameplaySettings
 {
     /// <summary>
     /// What to multiply the mouse input by when looking around
@@ -131,19 +126,23 @@ public struct GameplaySettings
     /// </summary>
     public bool fovModifier;
 
-    public GameplaySettings(float mouseSensitivity, float controllerSensitivity, bool toggleCrouch, bool toggleSprint, bool invertY, bool fovModifier)
+    public KeyCode code = KeyCode.A;
+    public string tmp = "hi";
+
+    public GameplaySettings()
     {
-        this.mouseSensitivity = mouseSensitivity;
-        this.controllerSensitivity = controllerSensitivity;
-        this.toggleCrouch = toggleCrouch;
-        this.toggleSprint = toggleSprint;
-        this.invertY = invertY;
-        this.fovModifier = fovModifier;
+        this.mouseSensitivity = 0.5f;
+        this.controllerSensitivity = 5f;
+        this.toggleCrouch = false;
+        this.toggleSprint = false;
+        this.invertY = false;
+        this.fovModifier = true;
+            
     }
 }
 
 [Serializable]
-public struct KeybindSettings
+public class KeybindSettings
 {
     //TODO
 }
