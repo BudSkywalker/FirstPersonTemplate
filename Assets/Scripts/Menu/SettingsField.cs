@@ -86,7 +86,7 @@ namespace Menu
                     //TODO: The dropdowns don't work yet
                     dropdown.options = Enum.GetNames(setting.FieldType).Select(s => new TMP_Dropdown.OptionData(s)).ToList();
 
-                    dropdown.onValueChanged.AddListener(_ => UpdateSettings(dropdown.value));
+                    dropdown.onValueChanged.AddListener(_ => UpdateSettings(setting.FieldType.GetEnumValues().GetValue(dropdown.value)));
                     switch (settingsMenu)
                     {
                         case SettingsMenu.Video:

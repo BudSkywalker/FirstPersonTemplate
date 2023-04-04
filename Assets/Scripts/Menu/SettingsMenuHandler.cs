@@ -1,9 +1,6 @@
-using System;
 using System.Linq;
-using OpenCover.Framework.Model;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Menu

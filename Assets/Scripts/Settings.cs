@@ -126,18 +126,14 @@ public class GameplaySettings
     /// </summary>
     public bool fovModifier;
 
-    public KeyCode code = KeyCode.A;
-    public string tmp = "hi";
-
     public GameplaySettings()
     {
-        this.mouseSensitivity = 0.5f;
-        this.controllerSensitivity = 5f;
-        this.toggleCrouch = false;
-        this.toggleSprint = false;
-        this.invertY = false;
-        this.fovModifier = true;
-            
+        mouseSensitivity = 0.5f;
+        controllerSensitivity = 5f;
+        toggleCrouch = false;
+        toggleSprint = false;
+        invertY = false;
+        fovModifier = true;
     }
 }
 
