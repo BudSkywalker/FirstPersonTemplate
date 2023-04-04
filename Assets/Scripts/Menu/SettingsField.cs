@@ -31,6 +31,8 @@ namespace Menu
         private void Awake()
         {
             GetMenuFields();
+            if (loadedFields.Length == 0) return;
+
             setting = loadedFields[settingIndex];
 
             switch (GetComponent<Selectable>())
@@ -83,7 +85,6 @@ namespace Menu
                     //b.onClick.AddListener(() => UpdateSettings());
                     break;
                 case TMP_Dropdown dropdown:
-                    //TODO: The dropdowns don't work yet
                     dropdown.options = Enum.GetNames(setting.FieldType).Select(s => new TMP_Dropdown.OptionData(s)).ToList();
 
                     dropdown.onValueChanged.AddListener(_ => UpdateSettings(setting.FieldType.GetEnumValues().GetValue(dropdown.value)));
