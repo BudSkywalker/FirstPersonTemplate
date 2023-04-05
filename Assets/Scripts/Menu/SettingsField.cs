@@ -11,6 +11,9 @@ using UnityEditor;
 
 namespace Menu
 {
+    /// <summary>
+    /// Allows you to pick a setting, and will use the Selectable that is attached to this script to update the setting's value
+    /// </summary>
     [RequireComponent(typeof(Selectable))]
     public class SettingsField : MonoBehaviour
     {
@@ -158,6 +161,9 @@ namespace Menu
             }
         }
 
+        /// <summary>
+        /// Gets all valid fields based on the selected menu and the Selectable type
+        /// </summary>
         internal void GetMenuFields()
         {
             switch (GetComponent<Selectable>())

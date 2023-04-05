@@ -2,6 +2,9 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Animates text in a textbox by typing out one letter at a time
+/// </summary>
 [RequireComponent(typeof(TMP_Text))]
 public class TextWriter : MonoBehaviour
 {

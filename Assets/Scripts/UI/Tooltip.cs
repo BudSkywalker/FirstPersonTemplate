@@ -2,14 +2,23 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// Displays a tooltip after hovering over object for specified delay
+/// </summary>
+/// <seealso cref="TooltipDisplay"/>
 public class Tooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    /// <summary>
+    /// Tooltip message to display
+    /// </summary>
+    public string text;
+    /// <summary>
+    /// Time to wait before displaying tooltip
+    /// </summary>
     [SerializeField]
-    private string text;
-    [SerializeField]
-    private float hoverDelay;
+    protected float hoverDelay = 3f;
 
-    private void Start()
+    protected virtual void Start()
     {
         if (TooltipDisplay.Instance != null) return;
 
@@ -38,11 +47,10 @@ public class Tooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         TooltipDisplay.Instance.gameObject.SetActive(false);
     }
 
-    private IEnumerator DisplayTooltip()
+    protected virtual IEnumerator DisplayTooltip()
     {
         yield return new WaitForSecondsRealtime(hoverDelay);
 
-        TooltipDisplay.Instance.Text.text = text;
-        TooltipDisplay.Instance.gameObject.SetActive(true);
+        TooltipDisplay.Instance.UpdateText(text);
     }
 }

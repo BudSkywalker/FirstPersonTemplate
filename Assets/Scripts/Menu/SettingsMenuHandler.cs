@@ -20,6 +20,10 @@ namespace Menu
             SelectPanel(childrenPanels[0].gameObject);
         }
 
+        /// <summary>
+        /// Enables <paramref name="panel"/> from all tagged children panels and disables the others
+        /// </summary>
+        /// <param name="panel">Panel to enable</param>
         public void SelectPanel(GameObject panel)
         {
             foreach (RectTransform p in childrenPanels) p.gameObject.SetActive(p.gameObject == panel);

@@ -2418,6 +2418,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6974970205427459449}
     m_Modifications:
+    - target: {fileID: 299919458316043429, guid: ba1f7a2cab51b854b801b92b0903a339, type: 3}
+      propertyPath: m_MaxValue
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 977927874216084978, guid: ba1f7a2cab51b854b801b92b0903a339, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -2918,7 +2922,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5387515421568742264, guid: e526e2f46c60c0a4d80eb6106ea0e111, type: 3}
       propertyPath: m_text
-      value: FOV Modifier
+      value: FOV Shifting
       objectReference: {fileID: 0}
     - target: {fileID: 8320654718134955218, guid: e526e2f46c60c0a4d80eb6106ea0e111, type: 3}
       propertyPath: m_AnchorMax.y
@@ -3035,6 +3039,25 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 9061759194671729531, guid: e526e2f46c60c0a4d80eb6106ea0e111, type: 3}
   m_PrefabInstance: {fileID: 5054392752220075135}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7969487458012512408 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2935645415873623271, guid: e526e2f46c60c0a4d80eb6106ea0e111, type: 3}
+  m_PrefabInstance: {fileID: 5054392752220075135}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7016647846676007196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7969487458012512408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb9633513ae87ae4ebe97f359778028c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: Should the camera FOV move when sprinting? (This can cause motion sickness)
+  hoverDelay: 3
 --- !u!1001 &5582949947908072685
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3712,6 +3735,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6974970205427459449}
     m_Modifications:
+    - target: {fileID: 299919458316043429, guid: ba1f7a2cab51b854b801b92b0903a339, type: 3}
+      propertyPath: m_MaxValue
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 977927874216084978, guid: ba1f7a2cab51b854b801b92b0903a339, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0

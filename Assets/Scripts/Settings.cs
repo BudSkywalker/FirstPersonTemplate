@@ -3,6 +3,9 @@ using System.IO;
 using System.Xml.Serialization;
 using UnityEngine;
 
+/// <summary>
+/// Contains all settings, as well as dealing with config file IO
+/// </summary>
 public static class Settings
 {
     private static readonly string FilePath = Path.Combine(Application.persistentDataPath, "Settings.config");
@@ -10,12 +13,19 @@ public static class Settings
     private static SettingsContainer settings;
     private static bool hasLoaded;
 
+    /// <summary>
+    /// Used to get the current loaded settings
+    /// </summary>
+    /// <returns>Loaded settings</returns>
     public static ref SettingsContainer GetSettings()
     {
         if (!hasLoaded) LoadSettingsFromFile();
         return ref settings;
     }
 
+    /// <summary>
+    /// Save the current settings to config file
+    /// </summary>
     public static void SaveSettings()
     {
         SaveSettingsToFile();
