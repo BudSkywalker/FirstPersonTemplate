@@ -71,6 +71,7 @@ namespace Menu
                             break;
                         case SettingsMenu.Audio:
                             slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().audioSettings));
+                            Settings.GetSettings().audioSettings.ApplyMixerSettings();
                             break;
                         case SettingsMenu.Gameplay:
                             slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().gameplaySettings));
@@ -98,6 +99,7 @@ namespace Menu
                             break;
                         case SettingsMenu.Audio:
                             dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().audioSettings));
+                            Settings.GetSettings().audioSettings.ApplySpeakerMode();
                             break;
                         case SettingsMenu.Gameplay:
                             dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().gameplaySettings));
@@ -148,6 +150,7 @@ namespace Menu
                     break;
                 case SettingsMenu.Audio:
                     setting.SetValue(Settings.GetSettings().audioSettings, value);
+                    Settings.GetSettings().audioSettings.ApplyMixerSettings();
                     break;
                 case SettingsMenu.Gameplay:
                     setting.SetValue(Settings.GetSettings().gameplaySettings, value);

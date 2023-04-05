@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Xml.Serialization;
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Contains all settings, as well as dealing with config file IO
@@ -105,7 +107,45 @@ public class VideoSettings
 [Serializable]
 public class AudioSettings
 {
-    //TODO
+    public float masterVolume;
+    public float musicVolume;
+    public float sfxVolume;
+    public float ambienceVolume;
+    public float dialogueVolume;
+    public AudioSpeakerMode speakerMode;
+    public bool subtitles;
+
+    private AudioMixer mixer;
+
+    public AudioSettings()
+    {
+        mixer = Resources.Load<AudioMixer>("Audio/Mixer");
+
+        masterVolume = 0;
+        musicVolume = 0;
+        sfxVolume = 0;
+        ambienceVolume = 0;
+        dialogueVolume = 0;
+        speakerMode = AudioSpeakerMode.Stereo;
+        subtitles = false;
+    }
+
+    public void ApplyMixerSettings()
+    {
+        mixer ??= Resources.Load<AudioMixer>("Audio/Mixer");
+        mixer.SetFloat("Master Volume", masterVolume <= -20 ? -80 : masterVolume);
+        mixer.SetFloat("Music Volume", musicVolume<= -20 ? -80 : musicVolume);
+        mixer.SetFloat("SFX Volume", sfxVolume<= -20 ? -80 : sfxVolume);
+        mixer.SetFloat("Ambience Volume", ambienceVolume<= -20 ? -80 : ambienceVolume);
+        mixer.SetFloat("Dialogue Volume", dialogueVolume<= -20 ? -80 : dialogueVolume);
+    }
+
+    public void ApplySpeakerMode()
+    {
+        AudioConfiguration config = UnityEngine.AudioSettings.GetConfiguration();
+        config.speakerMode = speakerMode;
+        UnityEngine.AudioSettings.Reset(config);
+    }
 }
 
 [Serializable]
