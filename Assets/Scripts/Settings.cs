@@ -134,10 +134,10 @@ public class AudioSettings
     {
         mixer ??= Resources.Load<AudioMixer>("Audio/Mixer");
         mixer.SetFloat("Master Volume", masterVolume <= -20 ? -80 : masterVolume);
-        mixer.SetFloat("Music Volume", musicVolume<= -20 ? -80 : musicVolume);
-        mixer.SetFloat("SFX Volume", sfxVolume<= -20 ? -80 : sfxVolume);
-        mixer.SetFloat("Ambience Volume", ambienceVolume<= -20 ? -80 : ambienceVolume);
-        mixer.SetFloat("Dialogue Volume", dialogueVolume<= -20 ? -80 : dialogueVolume);
+        mixer.SetFloat("Music Volume", musicVolume <= -20 ? -80 : musicVolume);
+        mixer.SetFloat("SFX Volume", sfxVolume <= -20 ? -80 : sfxVolume);
+        mixer.SetFloat("Ambience Volume", ambienceVolume <= -20 ? -80 : ambienceVolume);
+        mixer.SetFloat("Dialogue Volume", dialogueVolume <= -20 ? -80 : dialogueVolume);
     }
 
     public void ApplySpeakerMode()
