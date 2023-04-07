@@ -30,8 +30,26 @@ namespace Menu
         };
         internal FieldInfo[] loadedFields;
         private FieldInfo setting;
+        private bool hasSetListeners;
 
-        private void Awake()
+        private void OnEnable()
+        {
+           UpdateField(!hasSetListeners);
+           hasSetListeners = true;
+           if (settingsMenu == SettingsMenu.Video) Settings.GetSettings().videoSettings.onUpdateVideoSettings += UpdateField; 
+        }
+
+        private void OnDisable()
+        {
+            Settings.GetSettings().videoSettings.onUpdateVideoSettings -= UpdateField;
+        }
+
+        public void UpdateField()
+        {
+            UpdateField(false);
+        }
+        
+        private void UpdateField(bool addListeners)
         {
             GetMenuFields();
             if (loadedFields.Length == 0) return;
@@ -41,20 +59,20 @@ namespace Menu
             switch (GetComponent<Selectable>())
             {
                 case Toggle toggle:
-                    toggle.onValueChanged.AddListener(_ => UpdateSettings(toggle.isOn));
+                    if(addListeners) toggle.onValueChanged.AddListener(_ => UpdateSettings(toggle.isOn));
                     switch (settingsMenu)
                     {
                         case SettingsMenu.Video:
-                            toggle.isOn = (bool)setting.GetValue(Settings.GetSettings().videoSettings);
+                            toggle.SetIsOnWithoutNotify((bool)setting.GetValue(Settings.GetSettings().videoSettings));
                             break;
                         case SettingsMenu.Audio:
-                            toggle.isOn = (bool)setting.GetValue(Settings.GetSettings().audioSettings);
+                            toggle.SetIsOnWithoutNotify((bool)setting.GetValue(Settings.GetSettings().audioSettings));
                             break;
                         case SettingsMenu.Gameplay:
-                            toggle.isOn = (bool)setting.GetValue(Settings.GetSettings().gameplaySettings);
+                            toggle.SetIsOnWithoutNotify((bool)setting.GetValue(Settings.GetSettings().gameplaySettings));
                             break;
                         case SettingsMenu.Keybinds:
-                            toggle.isOn = (bool)setting.GetValue(Settings.GetSettings().keybindSettings);
+                            toggle.SetIsOnWithoutNotify((bool)setting.GetValue(Settings.GetSettings().keybindSettings));
                             break;
                         default:
                             Debug.LogError($"Unknown menu type {settingsMenu}");
@@ -63,21 +81,53 @@ namespace Menu
 
                     break;
                 case Slider slider:
-                    slider.onValueChanged.AddListener(_ => UpdateSettings(slider.value));
+                    if (addListeners)
+                    {
+                        if(slider.wholeNumbers) slider.onValueChanged.AddListener(_ => UpdateSettings((int)slider.value));
+                        else slider.onValueChanged.AddListener(_ => UpdateSettings(slider.value));
+                    }
                     switch (settingsMenu)
                     {
                         case SettingsMenu.Video:
-                            slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().videoSettings));
+                            try
+                            {
+                                slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().videoSettings));
+                            }
+                            catch (InvalidCastException)
+                            {
+                                slider.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().videoSettings));
+                            }
                             break;
                         case SettingsMenu.Audio:
-                            slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().audioSettings));
+                            try
+                            {
+                                slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().audioSettings));
+                            }
+                            catch (InvalidCastException)
+                            {
+                                slider.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().audioSettings));
+                            }
                             Settings.GetSettings().audioSettings.ApplyMixerSettings();
                             break;
                         case SettingsMenu.Gameplay:
-                            slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().gameplaySettings));
+                            try
+                            {
+                                slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().gameplaySettings));
+                            }
+                            catch (InvalidCastException)
+                            {
+                                slider.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().gameplaySettings));
+                            }
                             break;
                         case SettingsMenu.Keybinds:
-                            slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().keybindSettings));
+                            try
+                            {
+                                slider.SetValueWithoutNotify((float)setting.GetValue(Settings.GetSettings().keybindSettings));
+                            }
+                            catch (InvalidCastException)
+                            {
+                                slider.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().keybindSettings));
+                            }
                             break;
                         default:
                             Debug.LogError($"Unknown menu type {settingsMenu}");
@@ -89,32 +139,56 @@ namespace Menu
                     //b.onClick.AddListener(() => UpdateSettings());
                     break;
                 case TMP_Dropdown dropdown:
-                    dropdown.options = Enum.GetNames(setting.FieldType).Select(s => new TMP_Dropdown.OptionData(s)).ToList();
-
-                    dropdown.onValueChanged.AddListener(_ => UpdateSettings(setting.FieldType.GetEnumValues().GetValue(dropdown.value)));
-                    switch (settingsMenu)
+                    switch (setting.Name)
                     {
-                        case SettingsMenu.Video:
-                            dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().videoSettings));
+                        case "resolution":
+                        {
+                            dropdown.options = Screen.resolutions.Select(x => x.width + "x" + x.height).Distinct().Select(s => new TMP_Dropdown.OptionData(s)).ToList();
+                            if(addListeners) dropdown.onValueChanged.AddListener(_ => UpdateSettings(dropdown.options[dropdown.value].text));
+                            int index = Array.IndexOf(dropdown.options.ToArray(), dropdown.options.ToArray().First(x => x.text.Equals(Settings.GetSettings().videoSettings.width + "x" + Settings.GetSettings().videoSettings.height)));
+                            dropdown.SetValueWithoutNotify(index);
                             break;
-                        case SettingsMenu.Audio:
-                            dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().audioSettings));
-                            Settings.GetSettings().audioSettings.ApplySpeakerMode();
+                        }
+                        case "refreshRate":
+                        {
+                            dropdown.options = Screen.resolutions.Select(x => x.refreshRate).Distinct().Select(s => new TMP_Dropdown.OptionData(s.ToString())).ToList();
+                            if(addListeners) dropdown.onValueChanged.AddListener(_ => UpdateSettings(dropdown.options[dropdown.value].text));
+                            int index = Array.IndexOf(dropdown.options.ToArray(), dropdown.options.ToArray().First(x => x.text.Equals(Settings.GetSettings().videoSettings.refreshRate.ToString())));
+                            dropdown.SetValueWithoutNotify(index);
                             break;
-                        case SettingsMenu.Gameplay:
-                            dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().gameplaySettings));
-                            break;
-                        case SettingsMenu.Keybinds:
-                            dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().keybindSettings));
-                            break;
+                        }
                         default:
-                            Debug.LogError($"Unknown menu type {settingsMenu}");
-                            throw new ArgumentOutOfRangeException();
+                        {
+                            dropdown.options = Enum.GetNames(setting.FieldType).Select(s => new TMP_Dropdown.OptionData(s)).ToList();
+
+                            if(addListeners) dropdown.onValueChanged.AddListener(_ => UpdateSettings(setting.FieldType.GetEnumValues().GetValue(dropdown.value)));
+                            switch (settingsMenu)
+                            {
+                                case SettingsMenu.Video:
+                                    dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().videoSettings));
+                                    break;
+                                case SettingsMenu.Audio:
+                                    dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().audioSettings));
+                                    Settings.GetSettings().audioSettings.ApplySpeakerMode();
+                                    break;
+                                case SettingsMenu.Gameplay:
+                                    dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().gameplaySettings));
+                                    break;
+                                case SettingsMenu.Keybinds:
+                                    dropdown.SetValueWithoutNotify((int)setting.GetValue(Settings.GetSettings().keybindSettings));
+                                    break;
+                                default:
+                                    Debug.LogError($"Unknown menu type {settingsMenu}");
+                                    throw new ArgumentOutOfRangeException();
+                            }
+
+                            break;
+                        }
                     }
 
                     break;
                 case TMP_InputField inputField:
-                    inputField.onValueChanged.AddListener(_ => UpdateSettings(inputField.text));
+                    if(addListeners) inputField.onValueChanged.AddListener(_ => UpdateSettings(inputField.text));
                     switch (settingsMenu)
                     {
                         case SettingsMenu.Video:
@@ -146,7 +220,19 @@ namespace Menu
             switch (settingsMenu)
             {
                 case SettingsMenu.Video:
-                    setting.SetValue(Settings.GetSettings().videoSettings, value);
+                    if (setting.Name.Equals("resolution"))
+                    {
+                        int xIndex = Array.IndexOf(((string)value).ToCharArray(), 'x');
+                        Settings.GetSettings().videoSettings.width = int.Parse(((string)value)[..xIndex]);
+                        Settings.GetSettings().videoSettings.height = int.Parse(((string)value)[(xIndex + 1)..]);
+                    }
+                    else
+                    {
+                        setting.SetValue(Settings.GetSettings().videoSettings, value);
+                    }
+
+                    if (setting.Name.Equals("resolution") || setting.Name.Equals("refreshRate") || setting.Name.Equals("fullScreenMode")) Settings.GetSettings().videoSettings.UpdateVideoScreenSettings();
+                    else Settings.GetSettings().videoSettings.UpdateVideoQualitySettings();
                     break;
                 case SettingsMenu.Audio:
                     setting.SetValue(Settings.GetSettings().audioSettings, value);
@@ -180,7 +266,7 @@ namespace Menu
                 case Button:
                     break;
                 case TMP_Dropdown:
-                    loadedFields = menu[settingsMenu].GetFields().Where(x => x.FieldType.IsEnum).ToArray();
+                    loadedFields = menu[settingsMenu].GetFields().Where(x => x.FieldType.IsEnum || x.Name.Equals("resolution") || x.Name.Equals("refreshRate")).ToArray();
                     break;
                 case TMP_InputField:
                     loadedFields = menu[settingsMenu].GetFields().Where(x => x.FieldType == typeof(string)).ToArray();

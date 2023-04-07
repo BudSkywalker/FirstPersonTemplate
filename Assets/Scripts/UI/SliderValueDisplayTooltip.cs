@@ -22,7 +22,7 @@ public class SliderValueDisplayTooltip : Tooltip, IPointerMoveHandler
 
     protected override IEnumerator DisplayTooltip()
     {
-        TooltipDisplay.Instance.UpdateText(slider.value.ToString());
+        TooltipDisplay.Instance.UpdateText(slider.value.ToString("F2"));
         TooltipDisplay.Instance.gameObject.SetActive(true);
         yield return new WaitForEndOfFrame();
     }

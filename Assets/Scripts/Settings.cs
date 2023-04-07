@@ -3,7 +3,7 @@ using System.IO;
 using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.Serialization;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Contains all settings, as well as dealing with config file IO
@@ -101,7 +101,110 @@ public struct SettingsContainer
 [Serializable]
 public class VideoSettings
 {
-    //TODO
+    [XmlIgnore]
+    public Resolution resolution;
+
+    #region XML Resolution
+    public int width;
+    public int height;
+    public int refreshRate;
+    #endregion
+
+    public FullScreenMode fullScreenMode;
+    public bool vSync;
+
+    public QualityLevel qualityLevel;
+    public AnisotropicFiltering anisotropicFiltering;
+    public float lodBias;
+    public int maximumLODLevel;
+
+    public bool depthTexture;
+    public AntialiasingLevel antiAliasing;
+    public float shadowDistance;
+    public float shadowDepthBias;
+    public float shadowNormalBias;
+
+    public delegate void OnUpdateVideoSettings();
+
+    public event OnUpdateVideoSettings onUpdateVideoSettings;
+
+    public VideoSettings()
+    {
+        resolution = Screen.currentResolution;
+        width = resolution.width;
+        height = resolution.height;
+        refreshRate = resolution.refreshRate;
+        fullScreenMode = FullScreenMode.FullScreenWindow;
+        vSync = true;
+        qualityLevel = QualityLevel.Ultra;
+        anisotropicFiltering = AnisotropicFiltering.Enable;
+        lodBias = 1;
+        maximumLODLevel = 4;
+        depthTexture = true;
+        antiAliasing = AntialiasingLevel.x8;
+        shadowDistance = 150;
+        shadowDepthBias = 1f;
+        shadowNormalBias = 1f;
+
+        UpdateVideoScreenSettings();
+        UpdateVideoQualitySettings();
+    }
+
+    public void UpdateVideoScreenSettings()
+    {
+        Screen.SetResolution(width, height, fullScreenMode, refreshRate);
+
+        onUpdateVideoSettings?.Invoke();
+    }
+
+    public void UpdateVideoQualitySettings()
+    {
+        QualitySettings.SetQualityLevel((int)qualityLevel);
+
+        QualitySettings.anisotropicFiltering = anisotropicFiltering;
+        QualitySettings.lodBias = lodBias;
+        QualitySettings.maximumLODLevel = maximumLODLevel;
+        QualitySettings.vSyncCount = vSync ? 1 : 0;
+
+        UniversalRenderPipelineAsset urpAsset = UniversalRenderPipeline.asset;
+        urpAsset.supportsCameraDepthTexture = depthTexture;
+        urpAsset.msaaSampleCount = antiAliasing switch
+        {
+            AntialiasingLevel.Disabled => 0,
+            AntialiasingLevel.x2 => 2,
+            AntialiasingLevel.x4 => 4,
+            AntialiasingLevel.x8 => 8,
+            _ => urpAsset.msaaSampleCount
+        };
+        urpAsset.shadowDistance = shadowDistance;
+        urpAsset.shadowDepthBias = shadowDepthBias;
+        urpAsset.shadowNormalBias = shadowNormalBias;
+
+        onUpdateVideoSettings?.Invoke();
+    }
+}
+
+/// <summary>
+/// This is a custom enum that needs to be manually changed to reflect the Project Settings
+/// </summary>
+[Serializable]
+public enum QualityLevel
+{
+    VeryLow,
+    Low,
+    Medium,
+    High,
+    VeryHigh,
+    Ultra
+}
+
+[Serializable]
+public enum AntialiasingLevel
+{
+    Disabled,
+    x2,
+    x4,
+    x8
 }
 
 [Serializable]
