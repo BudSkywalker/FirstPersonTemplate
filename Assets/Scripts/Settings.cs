@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 
 /// <summary>
@@ -101,21 +104,45 @@ public struct SettingsContainer
 [Serializable]
 public class VideoSettings
 {
+    /// <summary>
+    /// Stores information about the currently loaded resolution
+    /// </summary>
     [XmlIgnore]
     public Resolution resolution;
 
     #region XML Resolution
+    /// <summary>
+    /// Desired screen width
+    /// </summary>
     public int width;
+    /// <summary>
+    /// Desired screen height
+    /// </summary>
     public int height;
+    /// <summary>
+    /// Desired screen refreshRate
+    /// </summary>
     public int refreshRate;
     #endregion
 
     public FullScreenMode fullScreenMode;
+    /// <summary>
+    /// Whether to use V-Sync or not
+    /// </summary>
     public bool vSync;
 
+    /// <summary>
+    /// Quality level controls settings that can't be changed at runtime, mostly dealing with shadows and PPVs
+    /// </summary>
     public QualityLevel qualityLevel;
     public AnisotropicFiltering anisotropicFiltering;
+    /// <summary>
+    /// Level of blending between lod levels
+    /// </summary>
     public float lodBias;
+    /// <summary>
+    /// Limits how high-poly models can get
+    /// </summary>
     public int maximumLODLevel;
 
     public bool depthTexture;
@@ -150,6 +177,9 @@ public class VideoSettings
         UpdateVideoQualitySettings();
     }
 
+    /// <summary>
+    /// Updates the screen's resolution and refresh rate, and full screen mode
+    /// </summary>
     public void UpdateVideoScreenSettings()
     {
         Screen.SetResolution(width, height, fullScreenMode, refreshRate);
@@ -157,6 +187,9 @@ public class VideoSettings
         onUpdateVideoSettings?.Invoke();
     }
 
+    /// <summary>
+    /// Updates all quality settings/settings not mentioned in <see cref="UpdateVideoScreenSettings"/>
+    /// </summary>
     public void UpdateVideoQualitySettings()
     {
         QualitySettings.SetQualityLevel((int)qualityLevel);
@@ -293,5 +326,52 @@ public class GameplaySettings
 [Serializable]
 public class KeybindSettings
 {
-    //TODO
+    /// <summary>
+    /// List of keybinds that the player has overriden from default
+    /// If you want to change this list please use <see cref="AddOverride"/>
+    /// </summary>
+    public List<KeybindOverride> keybindOverrides = new();
+
+    /// <summary>
+    /// Loads overrides from settings file to <param name="input"></param>
+    /// </summary>
+    /// <param name="input">PlayerInput to have keybinds overridden</param>
+    public void LoadOverrides(ref PlayerInput input)
+    {
+        foreach (KeybindOverride keybind in keybindOverrides) input.currentActionMap.FindAction(keybind.actionID).ApplyBindingOverride(keybind.bindingID.ToString(), keybind.bindingPath);
+    }
+
+    /// <summary>
+    /// Adds override to the keybindOverrides list safely, replacing a value instead of blindly adding it
+    /// </summary>
+    /// <param name="actionID">The ID on the Action to be overridden</param>
+    /// <param name="bindingID">The ID of the binding to be overridden</param>
+    /// <param name="bindingPath">The path the the keybind that will override the default</param>
+    public void AddOverride(Guid actionID, Guid bindingID, string bindingPath)
+    {
+        if (keybindOverrides.Any(x => x.actionID.Equals(actionID))) keybindOverrides.First(x => x.actionID.Equals(actionID)).SetValues(actionID, bindingID, bindingPath);
+        else keybindOverrides.Add(new(actionID, bindingID, bindingPath));
+    }
+}
+
+[Serializable]
+public struct KeybindOverride
+{
+    public Guid actionID;
+    public Guid bindingID;
+    public string bindingPath;
+
+    public KeybindOverride(Guid actionID, Guid bindingID, string bindingPath)
+    {
+        this.actionID = actionID;
+        this.bindingID = bindingID;
+        this.bindingPath = bindingPath;
+    }
+
+    public void SetValues(Guid newActionID, Guid newBindingID, string newBindingPath)
+    {
+        actionID = newActionID;
+        bindingID = newBindingID;
+        bindingPath = newBindingPath;
+    }
 }
