@@ -49,13 +49,12 @@ namespace Menu
         private void Awake()
         {
             playerInput = FindObjectOfType<PlayerInput>() ?? gameObject.AddComponent<PlayerInput>();
-            Debug.Log(playerInput);
             playerInput.onControlsChanged += Repoplute;
         }
 
         private void OnEnable()
         {
-            if(transform.childCount == 0) Repoplute();
+            if (transform.childCount == 0) Repoplute();
         }
 
         private void Repoplute(PlayerInput obj)
@@ -65,10 +64,7 @@ namespace Menu
 
         private void Repoplute()
         {
-            if (headerPrefab is not null)
-            {
-                Instantiate(headerPrefab, transform).GetComponentInChildren<TMP_Text>().text = playerInput.currentControlScheme + " Keybinds";
-            }
+            if (headerPrefab is not null) Instantiate(headerPrefab, transform).GetComponentInChildren<TMP_Text>().text = playerInput.currentControlScheme + " Keybinds";
             foreach (Transform t in GetComponentsInChildren<Transform>().Where(go => go != transform)) Destroy(t.gameObject);
 
             foreach (InputAction action in inputActionAsset.actionMaps[referenceMapIndex].actions)
@@ -78,9 +74,9 @@ namespace Menu
                     if (binding.groups.Contains(playerInput.currentControlScheme))
                     {
                         KeyRebinder rebinder = Instantiate(rebindPrefab, transform).GetComponent<KeyRebinder>();
-                        rebinder.action = action;
-                        rebinder.binding = binding;
                         rebinder.actionMap = inputActionAsset.actionMaps[targetMapIndex];
+                        rebinder.action = rebinder.actionMap.FindAction(action.name);
+                        rebinder.binding = rebinder.action.bindings[Array.IndexOf(action.bindings.ToArray(), binding)];
                     }
                 }
             }

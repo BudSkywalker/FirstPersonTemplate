@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Contains all settings, as well as dealing with config file IO
@@ -338,40 +339,49 @@ public class KeybindSettings
     /// <param name="input">PlayerInput to have keybinds overridden</param>
     public void LoadOverrides(ref PlayerInput input)
     {
-        foreach (KeybindOverride keybind in keybindOverrides) input.currentActionMap.FindAction(keybind.actionID).ApplyBindingOverride(keybind.bindingID.ToString(), keybind.bindingPath);
+        foreach (KeybindOverride keybind in keybindOverrides)
+        {
+            input.currentActionMap.FindAction(keybind.actionName).ApplyBindingOverride(keybind.bindingIndex, keybind.bindingPath);
+            KeyRebinder.UpdateKeybindLabels();
+        }
     }
 
     /// <summary>
     /// Adds override to the keybindOverrides list safely, replacing a value instead of blindly adding it
     /// </summary>
-    /// <param name="actionID">The ID on the Action to be overridden</param>
-    /// <param name="bindingID">The ID of the binding to be overridden</param>
+    /// <param name="actionName">The ID on the Action to be overridden</param>
+    /// <param name="bindingIndex">The ID of the binding to be overridden</param>
     /// <param name="bindingPath">The path the the keybind that will override the default</param>
-    public void AddOverride(Guid actionID, Guid bindingID, string bindingPath)
+    public void AddOverride(string actionName, int bindingIndex, string bindingPath)
     {
-        if (keybindOverrides.Any(x => x.actionID.Equals(actionID))) keybindOverrides.First(x => x.actionID.Equals(actionID)).SetValues(actionID, bindingID, bindingPath);
-        else keybindOverrides.Add(new(actionID, bindingID, bindingPath));
+        foreach (KeybindOverride k in keybindOverrides.Where(k => k.actionName.Equals(actionName)))
+        {
+            keybindOverrides.Remove(k);
+            break;
+        }
+
+        keybindOverrides.Add(new(actionName, bindingIndex, bindingPath));
     }
 }
 
 [Serializable]
 public struct KeybindOverride
 {
-    public Guid actionID;
-    public Guid bindingID;
+    public string actionName;
+    public int bindingIndex;
     public string bindingPath;
 
-    public KeybindOverride(Guid actionID, Guid bindingID, string bindingPath)
+    public KeybindOverride(string actionName, int bindingIndex, string bindingPath)
     {
-        this.actionID = actionID;
-        this.bindingID = bindingID;
+        this.actionName = actionName;
+        this.bindingIndex = bindingIndex;
         this.bindingPath = bindingPath;
     }
 
-    public void SetValues(Guid newActionID, Guid newBindingID, string newBindingPath)
+    public void SetValues(string newActionID, int newBindingID, string newBindingPath)
     {
-        actionID = newActionID;
-        bindingID = newBindingID;
+        actionName = newActionID;
+        bindingIndex = newBindingID;
         bindingPath = newBindingPath;
     }
 }

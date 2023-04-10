@@ -13,6 +13,9 @@ using UnityEngine.UI;
 /// </summary>
 public class KeyRebinder : MonoBehaviour
 {
+    public delegate void OnUpdateKeybindLabels();
+
+    public static event OnUpdateKeybindLabels onUpdateKeybindLabels;
     /// <summary>
     /// The <see cref="InputAction"/> of the keybind to control
     /// </summary>
@@ -30,15 +33,40 @@ public class KeyRebinder : MonoBehaviour
     public InputActionMap actionMap;
     private Button button;
     private TMP_Text labelText, buttonText;
+    private InputActionRebindingExtensions.RebindingOperation rebindAction;
+    private int index;
+    private PlayerInput playerInput;
 
     private void Start()
     {
+        playerInput = FindObjectOfType<PlayerInput>() ?? gameObject.AddComponent<PlayerInput>();
+
+        index = Array.IndexOf(action.bindings.ToArray(), binding);
+        action = actionMap.FindAction(action.name);
+        binding = action.bindings[index];
         labelText = GetComponentInChildren<TMP_Text>();
         button = GetComponentInChildren<Button>();
         buttonText = button.GetComponentsInChildren<TMP_Text>().First(x => x != labelText);
         button.onClick.AddListener(OnStartBind);
 
-        labelText.text = binding.isPartOfComposite ? binding.name : action.name;
+        labelText.text = binding.isPartOfComposite ? action.name + " " + binding.name : action.name;
+        onUpdateKeybindLabels += UpdateButtonText;
+        UpdateButtonText();
+    }
+
+    private void OnEnable()
+    {
+        //UpdateButtonText();
+    }
+
+    public static void UpdateKeybindLabels()
+    {
+        onUpdateKeybindLabels?.Invoke();
+    }
+
+    private void UpdateButtonText()
+    {
+        binding = action.bindings[index];
         buttonText.text = binding.ToDisplayString();
     }
 
@@ -50,8 +78,9 @@ public class KeyRebinder : MonoBehaviour
 
     private void WhileBinding()
     {
-        InputActionRebindingExtensions.RebindingOperation rebindAction =
-            action.PerformInteractiveRebinding(Array.IndexOf(action.bindings.ToArray(), binding))
+        playerInput.DeactivateInput();
+        rebindAction =
+            action.PerformInteractiveRebinding(index)
                 .WithBindingGroup(binding.groups)
                 .WithControlsExcluding("<Mouse>/position")
                 .WithControlsExcluding("<Mouse>/delta")
@@ -59,19 +88,18 @@ public class KeyRebinder : MonoBehaviour
                 .WithControlsExcluding("<Keyboard>/anyKey")
                 .OnMatchWaitForAnother(0.1f);
 
-        rebindAction.OnComplete(_ =>
-        {
-            Settings.GetSettings().keybindSettings.AddOverride(action.id, binding.id, binding.effectivePath);
-            OnStopBind(ref rebindAction);
-            Settings.SaveSettings();
-        });
+        rebindAction.OnComplete(_ => OnStopBind(index));
 
         rebindAction.Start();
     }
 
-    private void OnStopBind(ref InputActionRebindingExtensions.RebindingOperation rebindAction)
+    private void OnStopBind(int index)
     {
-        buttonText.text = binding.ToDisplayString();
         rebindAction.Dispose();
+        binding = action.bindings[index];
+        buttonText.text = binding.ToDisplayString();
+        Settings.GetSettings().keybindSettings.AddOverride(action.name, index, binding.effectivePath);
+        Settings.SaveSettings();
+        playerInput.ActivateInput();
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using Menu;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -163,15 +164,21 @@ public sealed class PlayerController : MonoBehaviour
 
     #region Unity Funcs
     /// <summary>
-    /// Unity's Start function
+    /// Unity's Awake function
     /// </summary>
-    private void Start()
+    private void Awake()
     {
         controller = GetComponent<CharacterController>();
         input = GetComponent<PlayerInput>();
         Settings.GetSettings().keybindSettings.LoadOverrides(ref input);
+    }
 
-        Cursor.lockState = CursorLockMode.Locked;
+    /// <summary>
+    /// Unity's Start function
+    /// </summary>
+    private void Start()
+    {
+        //Cursor.lockState = CursorLockMode.Locked;
         fov = playerCamera.fieldOfView;
         tVelocity = Mathf.Sqrt(2 * mass * gravity / 0.8575f * Mathf.PI * Mathf.Pow(controller.radius, 2));
         height = controller.height;
