@@ -3,7 +3,6 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -11,8 +10,8 @@ using UnityEditor;
 namespace Menu
 {
     /// <summary>
-    /// Populates a panel with all keybinds in a certain <see cref="InputActionMap"/> and sets up their <see cref="KeyRebinder"/>.
-    /// If you want to control multiple maps in the same menu you should add multiple <see cref="PopulateKeybindsPanel"/>
+    /// Populates a panel with all keybinds in a certain <see cref="InputActionMap" /> and sets up their <see cref="KeyRebinder" />.
+    /// If you want to control multiple maps in the same menu you should add multiple <see cref="PopulateKeybindsPanel" />
     /// scripts, one for each map to display in menu.
     /// </summary>
     public class PopulateKeybindsPanel : MonoBehaviour
@@ -23,21 +22,21 @@ namespace Menu
         [SerializeField]
         private GameObject headerPrefab;
         /// <summary>
-        /// Prefab controlled by a <see cref="KeyRebinder"/> to spawn
+        /// Prefab controlled by a <see cref="KeyRebinder" /> to spawn
         /// </summary>
         [SerializeField]
         private GameObject rebindPrefab;
         /// <summary>
-        /// What <see cref="InputActionAsset"/> do we use to get all the information from?
+        /// What <see cref="InputActionAsset" /> do we use to get all the information from?
         /// </summary>
         public InputActionAsset inputActionAsset;
         /// <summary>
-        /// The index of the target <see cref="InputActionMap"/> for this keybind set
+        /// The index of the target <see cref="InputActionMap" /> for this keybind set
         /// </summary>
         [HideInInspector]
         public int targetMapIndex;
         /// <summary>
-        /// The index of the reference <see cref="InputActionMap"/> for this keybind set.
+        /// The index of the reference <see cref="InputActionMap" /> for this keybind set.
         /// Some keybinds in a set might not want to be made available for the player,
         /// so a separate map should be duplicated and the protected fields removed.
         /// All actions in this map will be made available for customization.

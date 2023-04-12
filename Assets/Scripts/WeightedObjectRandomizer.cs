@@ -1,13 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 /// <summary>
 /// Handles randomization of
@@ -38,7 +33,7 @@ public class WeightedObjectRandomizer : MonoBehaviour
     public GameObject GetRandomObject()
     {
         int totalWeight = weightedObjects.Sum(x => x.weight);
-        int i = Random.Range(1, totalWeight+1);
+        int i = Random.Range(1, totalWeight + 1);
 
         foreach (WeightedObject wo in weightedObjects)
         {

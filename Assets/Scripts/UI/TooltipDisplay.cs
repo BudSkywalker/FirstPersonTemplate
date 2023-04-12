@@ -57,6 +57,7 @@ public class TooltipDisplay : MonoBehaviour
         text.text = tooltip;
         UpdateSizeAndPosition();
     }
+
     /// <summary>
     /// Updates the size and position of the tooltip. Should be done after every time the text is updated.
     /// </summary>

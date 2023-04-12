@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,27 +12,26 @@ public class KeyRebinder : MonoBehaviour
 {
     public delegate void OnUpdateKeybindLabels();
 
-    public static event OnUpdateKeybindLabels onUpdateKeybindLabels;
     /// <summary>
-    /// The <see cref="InputAction"/> of the keybind to control
+    /// The <see cref="InputAction" /> of the keybind to control
     /// </summary>
     [HideInInspector]
     public InputAction action;
     /// <summary>
-    /// The <see cref="InputBinding"/> of the keybind to control
+    /// The <see cref="InputBinding" /> of the keybind to control
     /// </summary>
     [HideInInspector]
     public InputBinding binding;
     /// <summary>
-    /// The <see cref="InputActionMap"/> of the keybind to control
+    /// The <see cref="InputActionMap" /> of the keybind to control
     /// </summary>
     [HideInInspector]
     public InputActionMap actionMap;
     private Button button;
-    private TMP_Text labelText, buttonText;
-    private InputActionRebindingExtensions.RebindingOperation rebindAction;
     private int index;
+    private TMP_Text labelText, buttonText;
     private PlayerInput playerInput;
+    private InputActionRebindingExtensions.RebindingOperation rebindAction;
 
     private void Start()
     {
@@ -54,10 +50,7 @@ public class KeyRebinder : MonoBehaviour
         UpdateButtonText();
     }
 
-    private void OnEnable()
-    {
-        //UpdateButtonText();
-    }
+    public static event OnUpdateKeybindLabels onUpdateKeybindLabels;
 
     public static void UpdateKeybindLabels()
     {

@@ -8,14 +8,6 @@ using UnityEngine;
 [RequireComponent(typeof(TMP_Text))]
 public class TextWriter : MonoBehaviour
 {
-    private enum WriteMode
-    {
-        Overflow,
-        Scroll,
-        Delete,
-        Stop
-    }
-
     [SerializeField]
     private float timePerLetter = 0.1f;
     [Multiline]
@@ -49,10 +41,7 @@ public class TextWriter : MonoBehaviour
                     case WriteMode.Overflow:
                         break;
                     case WriteMode.Scroll:
-                        while (textbox.preferredHeight > textbox.GetComponent<RectTransform>().rect.height)
-                        {
-                            textbox.text = textbox.text[1..];
-                        }
+                        while (textbox.preferredHeight > textbox.GetComponent<RectTransform>().rect.height) textbox.text = textbox.text[1..];
                         break;
                     case WriteMode.Delete:
                         textbox.text = "";
@@ -66,5 +55,13 @@ public class TextWriter : MonoBehaviour
 
             yield return new WaitForSeconds(timePerLetter);
         }
+    }
+
+    private enum WriteMode
+    {
+        Overflow,
+        Scroll,
+        Delete,
+        Stop
     }
 }

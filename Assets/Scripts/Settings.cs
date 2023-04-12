@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.Serialization;
 
 /// <summary>
 /// Contains all settings, as well as dealing with config file IO
@@ -105,6 +104,10 @@ public struct SettingsContainer
 [Serializable]
 public class VideoSettings
 {
+    public delegate void OnUpdateVideoSettings();
+
+    public event OnUpdateVideoSettings onUpdateVideoSettings;
+
     /// <summary>
     /// Stores information about the currently loaded resolution
     /// </summary>
@@ -152,10 +155,6 @@ public class VideoSettings
     public float shadowDepthBias;
     public float shadowNormalBias;
 
-    public delegate void OnUpdateVideoSettings();
-
-    public event OnUpdateVideoSettings onUpdateVideoSettings;
-
     public VideoSettings()
     {
         resolution = Screen.currentResolution;
@@ -189,7 +188,7 @@ public class VideoSettings
     }
 
     /// <summary>
-    /// Updates all quality settings/settings not mentioned in <see cref="UpdateVideoScreenSettings"/>
+    /// Updates all quality settings/settings not mentioned in <see cref="UpdateVideoScreenSettings" />
     /// </summary>
     public void UpdateVideoQualitySettings()
     {
@@ -329,12 +328,12 @@ public class KeybindSettings
 {
     /// <summary>
     /// List of keybinds that the player has overriden from default
-    /// If you want to change this list please use <see cref="AddOverride"/>
+    /// If you want to change this list please use <see cref="AddOverride" />
     /// </summary>
     public List<KeybindOverride> keybindOverrides = new();
 
     /// <summary>
-    /// Loads overrides from settings file to <param name="input"></param>
+    /// Loads overrides from settings file to <paramref name="input"/>
     /// </summary>
     /// <param name="input">PlayerInput to have keybinds overridden</param>
     public void LoadOverrides(ref PlayerInput input)

@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// Displays a tooltip after hovering over object for specified delay
 /// </summary>
-/// <seealso cref="TooltipDisplay"/>
+/// <seealso cref="TooltipDisplay" />
 public class Tooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     /// <summary>

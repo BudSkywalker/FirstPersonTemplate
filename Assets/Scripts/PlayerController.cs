@@ -1,4 +1,3 @@
-using System;
 using Menu;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -192,6 +191,8 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        if (PauseMenu.IsPaused) return;
+
         Look();
         Crouch();
         HandleMovement();

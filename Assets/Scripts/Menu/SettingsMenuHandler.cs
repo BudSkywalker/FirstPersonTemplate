@@ -11,7 +11,7 @@ namespace Menu
 
         private void Start()
         {
-            childrenPanels = GetComponentsInChildren<RectTransform>(true).Where(x => x != this && x.CompareTag("Panel")).ToArray();
+            childrenPanels = GetComponentsInChildren<RectTransform>(true).Where(x => x.CompareTag("Panel")).ToArray();
             foreach (Toggle t in GetComponentsInChildren<Toggle>(true)) t.onValueChanged.AddListener(_ => SaveSettings());
             foreach (Slider s in GetComponentsInChildren<Slider>(true)) s.onValueChanged.AddListener(_ => Invoke(nameof(SaveSettings), 0.1f));
             foreach (Button b in GetComponentsInChildren<Button>(true)) b.onClick.AddListener(() => Invoke(nameof(SaveSettings), 0.1f));
@@ -21,7 +21,7 @@ namespace Menu
         }
 
         /// <summary>
-        /// Enables <paramref name="panel"/> from all tagged children panels and disables the others
+        /// Enables <paramref name="panel" /> from all tagged children panels and disables the others
         /// </summary>
         /// <param name="panel">Panel to enable</param>
         public void SelectPanel(GameObject panel)

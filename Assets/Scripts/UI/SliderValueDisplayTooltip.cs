@@ -20,16 +20,16 @@ public class SliderValueDisplayTooltip : Tooltip, IPointerMoveHandler
         slider = GetComponent<Slider>();
     }
 
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        StartCoroutine(DisplayTooltip());
+    }
+
     protected override IEnumerator DisplayTooltip()
     {
         TooltipDisplay.Instance.UpdateText(slider.value.ToString("F2"));
         TooltipDisplay.Instance.gameObject.SetActive(true);
         yield return new WaitForEndOfFrame();
-    }
-
-    public void OnPointerMove(PointerEventData eventData)
-    {
-        StartCoroutine(DisplayTooltip());
     }
 }
 
