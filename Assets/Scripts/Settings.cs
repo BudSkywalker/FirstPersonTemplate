@@ -311,6 +311,10 @@ public class GameplaySettings
     /// Should the camera FOV move when sprinting (can cause motion sickness)
     /// </summary>
     public bool fovModifier;
+    /// <summary>
+    /// Should the camera move up and down as you move
+    /// </summary>
+    public bool viewBobbing;
 
     public GameplaySettings()
     {
@@ -320,6 +324,7 @@ public class GameplaySettings
         toggleSprint = false;
         invertY = false;
         fovModifier = true;
+        viewBobbing = true;
     }
 }
 

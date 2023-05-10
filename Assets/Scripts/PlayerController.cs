@@ -33,7 +33,8 @@ public sealed class PlayerController : MonoBehaviour
     [SerializeField]
     private SphereCollider headChecker;
     /// <summary>
-    /// Empty <see cref="GameObject" /> that is the parent of any <see cref="MoveableInteractable" /> that this player carries visually in front of them
+    /// Empty <see cref="GameObject" /> that is the parent of any <see cref="MoveableInteractable" /> that this player carries
+    /// visually in front of them
     /// </summary>
     public GameObject carrySlot;
     /// <summary>
@@ -70,15 +71,25 @@ public sealed class PlayerController : MonoBehaviour
     [SerializeField]
     private float jumpHeight = 0.7f;
     /// <summary>
-    /// What is the gravity
-    /// </summary>
-    [SerializeField]
-    private float gravity = 9.81f;
-    /// <summary>
     /// What number to multiply the player's <see cref="controller" />'s height by when crouching
     /// </summary>
     [SerializeField]
     private float crouchModifier = 0.5f;
+    /// <summary>
+    /// The speed to bob the player up and down
+    /// </summary>
+    [SerializeField]
+    private float bobbingModifier = 4f;
+    /// <summary>
+    /// The speed to bob the player up and down
+    /// </summary>
+    [SerializeField]
+    private float bobbingClamp = 0.025f;
+    /// <summary>
+    /// How the the player can reach in meters
+    /// </summary>
+    [SerializeField]
+    private float reach = 10;
     /// <summary>
     /// The player's mass in kilograms
     /// </summary>
@@ -86,10 +97,10 @@ public sealed class PlayerController : MonoBehaviour
     [SerializeField]
     private float mass = 70;
     /// <summary>
-    /// How the the player can reach in meters
+    /// What is the gravity
     /// </summary>
     [SerializeField]
-    private float reach = 10;
+    private float gravity = 9.81f;
     #endregion
 
     #region Input
@@ -107,9 +118,18 @@ public sealed class PlayerController : MonoBehaviour
     /// </summary>
     private float velocity;
     /// <summary>
-    /// The player's terminal velocity. This is calculated in <see cref="Start" /> using the actual equation for terminal velocity
+    /// The player's terminal velocity. This is calculated in <see cref="Start" /> using the actual equation for terminal
+    /// velocity
     /// </summary>
     private float tVelocity;
+    /// <summary>
+    /// The timer used to smooth view bobbing
+    /// </summary>
+    private float bobbingTimer;
+    /// <summary>
+    /// A place holder for the <see cref="playerCamera" />'s local height to use with viewbobbing
+    /// </summary>
+    private Vector3 cameraHeight;
     /// <summary>
     /// A place holder for the character's height to reset <see cref="controller" />'s height back to after crouching
     /// </summary>
@@ -182,6 +202,7 @@ public sealed class PlayerController : MonoBehaviour
         tVelocity = Mathf.Sqrt(2 * mass * gravity / 0.8575f * Mathf.PI * Mathf.Pow(controller.radius, 2));
         height = controller.height;
         stepOffset = controller.stepOffset;
+        cameraHeight = playerCamera.transform.localPosition;
 
         controller.detectCollisions = true;
     }
@@ -343,6 +364,22 @@ public sealed class PlayerController : MonoBehaviour
             if (playerCamera.fieldOfView > fov) playerCamera.fieldOfView -= 0.5f;
             if (playerCamera.fieldOfView < fov) playerCamera.fieldOfView = fov;
         }
+
+        if (Settings.GetSettings().gameplaySettings.viewBobbing) DoViewBob(sprinting);
+    }
+
+    /// <summary>
+    /// Helper function for <see cref="Move" /> and <see cref="HandleMovement" /> that will handle view bobbing
+    /// </summary>
+    /// <param name="sprinting">Whether to add <see cref="sprintModifier" /> or not</param>
+    private void DoViewBob(bool sprinting)
+    {
+        bobbingTimer += Time.deltaTime;
+
+        float bobbingSpeed = (sprinting ? sprintModifier : 1) * playerSpeed * bobbingModifier;
+
+        if (Mathf.Abs(controller.velocity.magnitude) == 0) playerCamera.transform.localPosition = Vector3.Lerp(playerCamera.transform.localPosition, cameraHeight, Mathf.Abs(Mathf.Sin(bobbingTimer * bobbingSpeed) * bobbingClamp));
+        else playerCamera.transform.localPosition += Mathf.Sin(bobbingTimer * bobbingSpeed) * bobbingClamp * Vector3.up;
     }
 
     /// <summary>
