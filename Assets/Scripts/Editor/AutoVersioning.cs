@@ -62,7 +62,7 @@ public class AutoVersioning : IPrebuildSetup
         };
         process.Start();
         process.WaitForExit(10000);
-        string num = process.StandardOutput.ReadToEnd();
+        string num = process.StandardOutput.ReadLine();
         process.Close();
         #endregion
 
